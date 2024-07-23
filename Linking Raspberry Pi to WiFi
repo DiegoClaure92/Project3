@@ -1,0 +1,43 @@
+import network
+import urequests
+import time
+
+# Initialize the network interface
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+
+# Connect to the Wi-Fi network
+ssid = 'your_ssid'  # Replace with your Wi-Fi SSID
+password = 'your_password'  # Replace with your Wi-Fi password
+wlan.connect(ssid, password)
+
+# Wait until connected
+while not wlan.isconnected():
+    print('Connecting...')
+    time.sleep(1)
+
+print('Connected, IP address:', wlan.ifconfig()[0])
+
+# Get the MAC address
+mac_address = wlan.config('mac')
+mac_address_str = ':'.join('{:02x}'.format(b) for b in mac_address)
+print('MAC address:', mac_address_str)
+
+# URL for the POST request
+url = "http://10.128.6.190"
+data = {"mac": mac_address_str}
+
+# Prepare form data as a URL-encoded string
+form_data = "&".join(f"{key}={value}" for key, value in data.items())
+
+# Print form data for debugging
+print('Form data:', form_data)
+
+# Set the headers
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
+
+# Send the POST request with form data
+response = urequests.post(url, data=form_data, headers=headers)
+print('Response:', response.text)
